@@ -1,296 +1,293 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Platform, TextInput } from 'react-native';
 import axios from 'axios';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const Screen_01 = () => {
+    const route = useRoute();
+    const user = route.params?.user;
     const [category, setCategory] = useState([]);
     const [location, setLocation] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchFocused, setSearchFocused] = useState(false);
-    const screenWith = Dimensions.get('window').width;
-    useEffect(() => {
-        axios.get('https://671ba9d92c842d92c380d3a1.mockapi.io/category')
-            .then((response) => {
-                setCategory(response.data);
-            });
-        axios.get('https://671ba9d92c842d92c380d3a1.mockapi.io/location')
-            .then((response) => {
-                setLocation(response.data);
-            });
-    }, []);
-    const numColumns = 4;
-    return(
-        <SafeAreaView style = {styles.safeAreaView}>
+    const navigation = useNavigation();
 
-            <View style = {styles.container}>
-                <ScrollView style={{width:"100%",height:500}}>
-                    {/* Header */}
-                    <View style = {styles.headerContainer}>
-                        <View style = {styles.header}>
-                            <Image source={require('../assets/logoicon.png')} style = {styles.logoicon}/>
-                            <View style={[styles.searchBox,searchFocused && styles.inputContainerFocused]}>
-                            <TextInput style = {styles.searchInput}
-                            placeholder='Search'
+    const screenWidth = Dimensions.get('window').width;
+
+    useEffect(() => {
+        axios.get('http://192.168.1.13:3001/category').then((response) => {
+         setCategory(response.data);
+        });
+        axios.get('http://192.168.1.13:3001/location').then((response) => {
+         setLocation(response.data);
+        });
+    }, []);
+
+    const numColumns = 4;
+
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <ScrollView style={{width: "100%", height: 500}}>
+                {/* Header */}
+                <View style={styles.headerContainer}>
+                   <View style={styles.header}>
+                      <Image source={require('../assets/logoicon.png')} style={styles.logoicon}/>
+                      <View style={[styles.searchBox, searchFocused && styles.inputContainerFocused]}>
+                         <TextInput
+                            style={styles.searchInput}
+                            placeholder= "Search here..."
                             value={searchQuery}
                             onFocus={() => setSearchFocused(true)}
                             onBlur={() => setSearchFocused(false)}
                             onChangeText={setSearchQuery}
-                            ></TextInput>
-                            <Image source={require('../assets/findicon.png')} style = {styles.searchIcon}/>
+                         />
+                         <Image source={require('../assets/findicon.png')} style={styles.searchIcon}/>
+                      </View>
+                   </View>
+
+                   {/* User info */}
+                   <View style={styles.userInfoContainer}>
+                     <View style={styles.userInfo}>
+                        {/* <Image 
+                            source={user && user.avatar ? { uri: `http://192.168.1.13:3001/uploads/${user.avatar}` } : require('../assets/personicon.png')} 
+                            style={styles.userImage} 
+                        /> */}
+                        <View>
+                            <Text style={styles.welcomeText}>Welcome!</Text>
+                            <Text style={styles.userName}>{user ? user.username : "Guest"}</Text>
+                        </View>
+                     </View>
+                     <Image source={require('../assets/ringicon.png')} style={styles.iconBell}/>
+                   </View>
+                   
+                </View>
+
+                {/* Categories */}
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Category</Text>
+                    <Image source={require('../assets/3gach.png')} style={styles.icon3gach}/>
+                </View>
+                <FlatList
+                    data={category}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity style={[styles.categoryItem, {width: screenWidth / numColumns }]}>
+                            <View style={styles.categoryIconContainer}>
+                                <Image source={{ uri: item.image }} style={styles.categoryIcon}/>
                             </View>
-                        </View>
+                            <Text style={styles.categoryText}>{item.name}</Text>
+                        </TouchableOpacity>
+                    )}
+                    numColumns={numColumns}
+                />
 
-                        <View style = {styles.infoContainer}>
-                            <View style = {styles.info}>
-                                <Image source={require('../assets/personicon.png')} style = {styles.userImage}/>
-                                <View>
-                                    <Text style = {styles.welcomback}>Welcome !</Text>
-                                    <Text style = {styles.userName}>Dona Stroupe</Text>
-                                </View>
-                            </View>   
-                            <Image source={require('../assets/ringicon.png')} style = {styles.iconBell}/>
-                        </View>
-                    </View>
-                    {/* Category */}
+                {/* Popular Destination */}
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Popular Destination</Text>
+                    <Image source={require('../assets/3gach.png')} style={styles.icon3gach}/>
+                </View>
+                <FlatList
+                    data={location.slice(0, 3)}
+                    horizontal
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <Image source={{ uri: item.image }} style={styles.locationImage}/>
+                    )}
+                />
 
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Category</Text>
-                        <Image source={require('../assets/3gach.png')} style={styles.icon3gach}/>
-                    </View>
-                    <FlatList
-                        data={category}
-                        // horizontal={true}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({item}) => (
-                            <TouchableOpacity style={[styles.categoryItem,{width:screenWith/numColumns}]}>
-                                <View style={styles.categoryImageContainer}>
-                                    <Image source={{uri: item.image}} style={styles.categoryIcon}/>
-                                </View>
-
-                                <Text style={styles.categoryText}>{item.name}</Text>
-                            </TouchableOpacity>
-                        )}
-                        numColumns={numColumns}
-                    />
-
-                    \{/* popular */}
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Popular Destination</Text>
-                        <Image source={require('../assets/3gach.png')} style={styles.icon3gach}/>
-                    </View>
-                    <FlatList
-                        data={location.slice(0, 3)}
-                        horizontal
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({item}) => (
-                            <Image source={{uri: item.image}} style={styles.locationImage}/>
-                                
-                        )}
-                    />
-                    {/* recomand */}
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Recommended</Text>
-                        <Image source={require('../assets/3gach.png')} style={styles.icon3gach}/>
-                    </View>
-                    <FlatList
-                        data={location.slice(3, 5)}
-                        horizontal
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({item}) => (
-                            <Image source={{uri: item.image}} style={styles.locationImageOrder}/>
-                                
-                        )}
-                    />
+                {/* Recommended */}
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Recommended</Text>
+                </View>
+                <FlatList
+                    data={location.slice(3, 5)}
+                    horizontal
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <Image source={{ uri: item.image }} style={styles.locationImageOfRec}/>
+                    )}
+                />
                 </ScrollView>
 
-                {/* foot */}
-                <View style = {styles.botomNav}>
-                    <TouchableOpacity style={styles.navItem}>
-                        <Image source={require('../assets/homeicon.png')} style={styles.iconNav}/>
-                        <Text style={styles.iconText}>Home</Text>
-                    </TouchableOpacity>
+                {/* Footer or bottom nav */}
+                <View style={styles.bottomNav}>
+                   <TouchableOpacity style={styles.navItem}>
+                       <Image source={require('../assets/homeicon.png')} style={styles.navicon}/>
+                       <Text style={styles.navLabel}>Home</Text>
+                   </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.navItem}>
-                        <Image source={require('../assets/exploreicon.png')} style={styles.iconNav}/>
-                        <Text style={styles.iconText}>Explore</Text>
-                    </TouchableOpacity>
+                   <TouchableOpacity style={styles.navItem}>
+                       <Image source={require('../assets/exploreicon.png')} style={styles.navicon}/>
+                       <Text style={styles.navLabel}>Explore</Text>
+                   </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.navItem}>
-                        <Image source={require('../assets/searchicon.png')} style={styles.iconNav}/>
-                        <Text style={styles.iconText}>Search</Text>
-                    </TouchableOpacity>
+                   <TouchableOpacity style={styles.navItem}>
+                       <Image source={require('../assets/searchicon.png')} style={styles.navicon}/>
+                       <Text style={styles.navLabel}>Search</Text>
+                   </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.navItem}>
-                        <Image source={require('../assets/profileicon.png')} style={styles.iconNav}/>
-                        <Text style={styles.iconText}>Profile</Text>
-                    </TouchableOpacity>
-
+                   <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ProfileScreen', { user })}>
+                       <Image source={require('../assets/profileicon.png')} style={styles.navicon}/>
+                       <Text style={styles.navLabel}>Profile</Text>
+                   </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>
-
     );
-    
 };
 
 const styles = StyleSheet.create({
-    safeAreaView:{
-        flex:1,
-        backgroundColor:'#fff',
-       
+    safeArea:{
+        flex: 1,
+        backgroundColor: '#fff',
     },
     container:{
-        flex:1,
-        backgroundColor:'#fff',
-        paddingTop: Platform.OS === 'android' ? 25 : 0
+        flex: 1,
+        backgroundColor: '#fff',
+        paddingTop: Platform.OS === 'android' ? 25:0,
     },
     headerContainer:{
-        backgroundColor:'#5958b2',
-        height:220,
+        backgroundColor: '#5958b2',
+        height: 220,
     },
-    header:{
-        padding:20,
-        marginTop:20,
-        flexDirection:'row',
-        alignItems:'center',
-        justifyContent:'space-between' ,
+    header: {
+        padding: 20,
+        marginTop: 24,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     logoicon:{
         width: 50,
         height: 50,
     },
     searchBox:{
-        flex:1,
-        flexDirection:'row',
-        backgroundColor:'#fff',
-        marginLeft:10,
-        marginRight:10,
-        borderRadius:10,
-        padding:15,
-        alignItems:'center',
-        justifyContent:'space-between',
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        marginLeft: 10,
+        marginRight: 10,
+        borderRadius: 10,
+        padding: 15,
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     inputContainerFocused:{
-        borderColor:'#1f1f1f',
-        borderWidth:1,
+        borderColor: '#1f1f1f',
+        borderWidth: 1,
     },
     searchInput:{
-        backgroundColor:'transparent',
-        outlinewidth:0,
-        flex:1,
+        backgroundColor: 'transparent',
+        outlineWidth: 0,
+        flex: 1,
     },
     searchIcon:{
         width: 20,
         height: 20,
     },
-
-    infoContainer:{
-        paddingRight:20,
-        flexDirection:'row',
-        justifyContent:'space-between',
-        alignItems:'center',
+    userInfoContainer:{
+        paddingRight: 30,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
-    info:{
-       flexDirection:'row',
-       alignItems:'center',
-       paddingLeft:20,
-       padding:20
+    userInfo:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 20,
+        paddingLeft: 23,
     },
     userImage:{
-      width: 50,
-      height: 50,
-      borderRadius:23,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
     },
-    welcomback:{
-       fontSize: 18,
-       fontWeight:'bold',
-       color:'#fff',
-       marginLeft:10,
+    welcomeText:{
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginLeft: 10,
     },
     userName:{
         fontSize: 16,
-       color:'#ddd',
-       marginLeft:10,
+        color: '#ddd',
+        marginLeft: 10,
     },
     iconBell:{
         width: 50,
-        height: 50,
+        height: 50
     },
     sectionContainer:{
-        flexDirection:'row',
-        justifyContent:'space-between',
-        alignItems:'center',
-        padding:20,
-        paddingLeft:10,
-        paddingRight:30,
+        padding: 20,
+        paddingLeft: 10,
+        paddingRight: 30,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     sectionTitle:{
         fontSize: 20,
-        margin:10,
-        textAlign:'left',
+        margin: 10,
+        textAlign: 'left',
     },
     icon3gach:{
         width: 30,
         height: 30,
     },
     categoryItem:{
-        marginVertical:10,
-        alignItems:'center',
-        justifyContent:'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 10,
     },
-    categoryImageContainer:{
+    categoryIconContainer: {
         width: 64,
         height: 64,
-        borderRadius:30,
-        backgroundColor:'#6C63FF',
-        alignItems:'center',
-        justifyContent:'center',
+        borderRadius: 32,
+        backgroundColor: '#6C63FF',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     categoryIcon:{
         width: 64,
         height: 64,
     },
     categoryText:{
-        marginTop:10,
-        fontSize: 16,
-        color:'#333',
-        textAlign:'center',
+        marginTop: 8,
+        fontSize: 14,
+        color: '#333',
+        textAlign: 'center',
     },
     locationImage:{
         width: 122,
         height: 122,
-        margin:10,
-        borderRadius:10,
+        margin: 10,
+        borderRadius: 10,
     },
-    locationImageOrder:{
-        width: 200,
-        height: 200,
-        margin:10,
-        borderRadius:10,
+    locationImageOfRec:{
+        width: 192,
+        height: 192,
+        borderRadius: 10,
+        margin: 10,
     },
-    botomNav:{
-        flexDirection:'row',
-        justifyContent:'space-between',
-        backgroundColor:'#5958b2',
-        padding:25,
-      
+    bottomNav:{
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: '#5958b2',
+        padding: 25,
     },
     navItem:{
-        alignItems:'center',
+        alignItems: 'center',
     },
-    iconNav:{
-        
+    navLabel:{
+        color: '#fff',
+        fontSize: 14,
+        marginTop: 4,
+    },
+    navicon:{
         width: 40,
         height: 40,
     },
-    iconText:{
-        color:'#fff',
-        fontSize:14,
-        marginTop:14,
-    },
-
-
-
 });
 
 export default Screen_01;
