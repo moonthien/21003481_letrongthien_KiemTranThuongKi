@@ -39,7 +39,7 @@ export default function ChangePassScreen() {
       setModalVisible(true);
     } else {
       try {
-        const response = await axios.put('http://192.168.1.13:3001/reset-password', {
+        const response = await axios.put('http://192.168.100.170/reset-password', {
           username,
           password,
         });

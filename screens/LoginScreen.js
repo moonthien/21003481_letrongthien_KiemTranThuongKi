@@ -35,11 +35,10 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://192.168.1.13:3001/login', {
+      const response = await axios.post('http://192.168.100.170:3001/login', {
         username,
         password,
       });
-
       if (response.status === 200) {
         navigation.navigate("Screen_01", { user: response.data.user });
       } else {

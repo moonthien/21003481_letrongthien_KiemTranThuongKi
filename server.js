@@ -86,6 +86,7 @@ app.post('/login', (req, res) => {
 app.post('/register', upload.single('avatar'), (req, res) => {
     const { username, password } = req.body;
     const avatar = req.file ? req.file.filename : null;
+    console.log(req.file);
 
     // Kiểm tra username có tồn tại không
     const checkQuery = 'SELECT * FROM Account WHERE username = ?';
